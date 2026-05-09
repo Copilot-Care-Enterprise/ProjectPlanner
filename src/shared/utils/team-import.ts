@@ -49,6 +49,7 @@ const HEX_RE = /^#[0-9A-Fa-f]{6}$/;
 const VALID_ROLES: Record<string, Role> = {
   developer: 'Developer',
   sdet: 'SDET',
+  operations: 'Operations',
 };
 
 // ─── Role normalization ───────────────────────────────────────────────────────
@@ -133,7 +134,7 @@ function parseJsonPeople(raw: unknown, errors: string[], warnings: string[]): Im
 
     const roleRaw = typeof row['role'] === 'string' ? row['role'] : '';
     const role = normalizeRole(roleRaw);
-    if (!role) rowErrors.push(`people[${i}] "${row['name'] ?? '?'}": role "${roleRaw}" is invalid — must be Developer or SDET.`);
+    if (!role) rowErrors.push(`people[${i}] "${row['name'] ?? '?'}": role "${roleRaw}" is invalid — must be Developer, SDET, or Operations.`);
 
     if (rowErrors.length) { errors.push(...rowErrors); return []; }
 
@@ -243,7 +244,7 @@ function parseExcelPeople(wb: import('xlsx').WorkBook, xlsx: typeof import('xlsx
     if (!name) rowErrors.push(`People sheet row ${i + 2}: "Name" is required.`);
     if (!teamName) rowErrors.push(`People sheet row ${i + 2}: "Team" is required.`);
     const role = normalizeRole(roleRaw);
-    if (!role) rowErrors.push(`People sheet row ${i + 2} "${name || '?'}": Role "${roleRaw}" is invalid — must be Developer or SDET.`);
+    if (!role) rowErrors.push(`People sheet row ${i + 2} "${name || '?'}": Role "${roleRaw}" is invalid — must be Developer, SDET, or Operations.`);
 
     if (rowErrors.length) { errors.push(...rowErrors); return []; }
 

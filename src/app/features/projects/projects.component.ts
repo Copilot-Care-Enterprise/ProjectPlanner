@@ -1,8 +1,9 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CdkDrag, CdkDragDrop, CdkDragHandle, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
 import { AppStore } from '../../store/app.store';
 import { generateId } from '../../../shared/utils/ids';
+import { countWorkingDays } from '../../../shared/utils/dates';
 import type { EndDateMode, Person, Project, ProjectMemberAllocation, Stream, Team } from '../../../core/types';
 
 interface ProjectForm {
@@ -131,28 +132,47 @@ function todayIso(): string {
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
                 <div class="fg">
                   <label class="flabel">Start date <span class="freq">*</span></label>
-                  <input type="date" name="startDate" [(ngModel)]="form.startDate" required class="finput" />
+                  <input type="date" name="startDate"
+                    [ngModel]="form.startDate"
+                    (ngModelChange)="form.startDate=$event; formStartDate.set($event)"
+                    required class="finput" />
                 </div>
                 <div class="fg">
                   <label class="flabel">Estimate (days) <span class="freq">*</span></label>
-                  <input type="number" name="estimate" [(ngModel)]="form.estimate" required min="1" class="finput" />
+                  @if (autoEstimate() !== null) {
+                    <input type="number" name="estimate" [ngModel]="form.estimate"
+                      class="finput" readonly
+                      style="background:var(--border);color:var(--muted);cursor:not-allowed" />
+                    <span class="fhint" style="justify-content:flex-start">
+                      Auto-calculated: working days × team capacity
+                    </span>
+                  } @else {
+                    <input type="number" name="estimate" [(ngModel)]="form.estimate" required min="1" class="finput" />
+                  }
                 </div>
               </div>
               <div class="fg">
                 <label class="flabel">End date mode</label>
                 <div style="display:flex;gap:1.25rem;margin-top:.25rem">
                   <label style="display:flex;align-items:center;gap:.4rem;font-size:.875rem;cursor:pointer">
-                    <input type="radio" name="endDateMode" value="calculated" [(ngModel)]="form.endDateMode" /> Calculated
+                    <input type="radio" name="endDateMode" value="calculated"
+                      [ngModel]="form.endDateMode"
+                      (ngModelChange)="form.endDateMode=$event; formEndDateMode.set($event)" /> Calculated
                   </label>
                   <label style="display:flex;align-items:center;gap:.4rem;font-size:.875rem;cursor:pointer">
-                    <input type="radio" name="endDateMode" value="manual" [(ngModel)]="form.endDateMode" /> Manual deadline
+                    <input type="radio" name="endDateMode" value="manual"
+                      [ngModel]="form.endDateMode"
+                      (ngModelChange)="form.endDateMode=$event; formEndDateMode.set($event)" /> Manual deadline
                   </label>
                 </div>
               </div>
               @if (form.endDateMode === 'manual') {
                 <div class="fg">
                   <label class="flabel">Fixed end date <span class="freq">*</span></label>
-                  <input type="date" name="endDate" [(ngModel)]="form.endDate" [required]="form.endDateMode === 'manual'" class="finput" />
+                  <input type="date" name="endDate"
+                    [ngModel]="form.endDate"
+                    (ngModelChange)="form.endDate=$event; formEndDate.set($event)"
+                    [required]="form.endDateMode === 'manual'" class="finput" />
                 </div>
               }
               <div class="fg">
@@ -184,12 +204,12 @@ function todayIso(): string {
                           <td><strong>{{ personName(alloc.personId) }}</strong></td>
                           <td style="color:var(--muted)">{{ personRole(alloc.personId) }}</td>
                           <td>
-                            <div style="display:flex;align-items:center;gap:.5rem">
-                              <input type="range" min="5" max="100" step="5"
+                            <div style="display:flex;align-items:center;gap:.35rem">
+                              <input type="number" min="5" max="100" step="5"
                                 [value]="alloc.allocationPercentage"
                                 (change)="updateMemberPct(alloc.id, $event)"
-                                style="width:5rem;accent-color:var(--accent)" />
-                              <span style="font-size:.8125rem;color:var(--muted);min-width:2.25rem">{{ alloc.allocationPercentage }}%</span>
+                                class="finput" style="width:4.5rem;padding:.2rem .4rem;text-align:center" />
+                              <span style="font-size:.8125rem;color:var(--muted)">%</span>
                             </div>
                           </td>
                           <td>
@@ -242,9 +262,9 @@ function todayIso(): string {
                 </select>
               </div>
               <div class="fg">
-                <label class="flabel">Allocation: {{ memberForm.allocationPercentage }}%</label>
-                <input type="range" name="allocationPercentage" [(ngModel)]="memberForm.allocationPercentage"
-                  min="5" max="100" step="5" style="width:100%;accent-color:var(--accent)" />
+                <label class="flabel">Allocation %</label>
+                <input type="number" name="allocationPercentage" [(ngModel)]="memberForm.allocationPercentage"
+                  min="5" max="100" step="5" required class="finput" />
               </div>
               <div class="fg">
                 <label class="flabel">Contributing until <span class="freq">*</span></label>
@@ -278,9 +298,9 @@ function todayIso(): string {
                 </select>
               </div>
               <div class="fg">
-                <label class="flabel">Allocation per person: {{ addTeamForm.allocationPercentage }}%</label>
-                <input type="range" name="allocationPercentage" [(ngModel)]="addTeamForm.allocationPercentage"
-                  min="5" max="100" step="5" style="width:100%;accent-color:var(--accent)" />
+                <label class="flabel">Allocation per person (%)</label>
+                <input type="number" name="allocationPercentage" [(ngModel)]="addTeamForm.allocationPercentage"
+                  min="5" max="100" step="5" required class="finput" />
               </div>
               <div class="fg">
                 <label class="flabel">Contributing until <span class="freq">*</span></label>
@@ -300,6 +320,31 @@ function todayIso(): string {
 })
 export class ProjectsComponent {
   private readonly store = inject(AppStore);
+
+  // ─── Reactive form signals (feed autoEstimate) ────────────────────────────
+  readonly formStartDate   = signal<string>('');
+  readonly formEndDate     = signal<string>('');
+  readonly formEndDateMode = signal<EndDateMode>('calculated');
+
+  /** Person-days of capacity available between start and fixed end date. */
+  readonly autoEstimate = computed<number | null>(() => {
+    if (this.formEndDateMode() !== 'manual') return null;
+    const start   = this.formStartDate();
+    const end     = this.formEndDate();
+    const members = this.dialogMembers();
+    if (!start || !end || members.length === 0) return null;
+    const workingDays = countWorkingDays(start, end);
+    if (workingDays <= 0) return null;
+    const totalCapacity = members.reduce((sum, m) => sum + m.allocationPercentage / 100, 0);
+    return Math.round(workingDays * totalCapacity * 10) / 10;
+  });
+
+  constructor() {
+    effect(() => {
+      const est = this.autoEstimate();
+      if (est !== null) this.form.estimate = est;
+    });
+  }
 
   readonly projects = computed<Project[]>(() => this.store.activeScenario()?.projects ?? []);
   readonly streams  = computed<Stream[]>(() => this.store.activeScenario()?.streams ?? []);
@@ -346,6 +391,9 @@ export class ProjectsComponent {
     this.editId.set(null);
     this.form = this.emptyForm();
     this._pendingMembers.set([]);
+    this.formStartDate.set(todayIso());
+    this.formEndDate.set('');
+    this.formEndDateMode.set('calculated');
     this.dialogOpen.set(true);
   }
 
@@ -354,6 +402,9 @@ export class ProjectsComponent {
     this.form = { name: project.name, streamId: project.streamId, startDate: project.startDate,
       estimate: project.estimate, endDateMode: project.endDateMode, endDate: project.endDate ?? '', notes: project.notes };
     this._pendingMembers.set([]);
+    this.formStartDate.set(project.startDate);
+    this.formEndDate.set(project.endDate ?? '');
+    this.formEndDateMode.set(project.endDateMode);
     this.dialogOpen.set(true);
   }
 

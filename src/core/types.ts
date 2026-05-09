@@ -1,6 +1,6 @@
 // ─── Enums ───────────────────────────────────────────────────────────────────
 
-export type Role = 'Developer' | 'SDET';
+export type Role = 'Developer' | 'SDET' | 'Operations';
 
 export type EndDateMode = 'calculated' | 'manual';
 
