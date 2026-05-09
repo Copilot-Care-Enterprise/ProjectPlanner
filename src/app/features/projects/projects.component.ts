@@ -204,12 +204,12 @@ function todayIso(): string {
                           <td><strong>{{ personName(alloc.personId) }}</strong></td>
                           <td style="color:var(--muted)">{{ personRole(alloc.personId) }}</td>
                           <td>
-                            <div style="display:flex;align-items:center;gap:.5rem">
-                              <input type="range" min="5" max="100" step="5"
+                            <div style="display:flex;align-items:center;gap:.35rem">
+                              <input type="number" min="5" max="100" step="5"
                                 [value]="alloc.allocationPercentage"
                                 (change)="updateMemberPct(alloc.id, $event)"
-                                style="width:5rem;accent-color:var(--accent)" />
-                              <span style="font-size:.8125rem;color:var(--muted);min-width:2.25rem">{{ alloc.allocationPercentage }}%</span>
+                                class="finput" style="width:4.5rem;padding:.2rem .4rem;text-align:center" />
+                              <span style="font-size:.8125rem;color:var(--muted)">%</span>
                             </div>
                           </td>
                           <td>
@@ -262,9 +262,9 @@ function todayIso(): string {
                 </select>
               </div>
               <div class="fg">
-                <label class="flabel">Allocation: {{ memberForm.allocationPercentage }}%</label>
-                <input type="range" name="allocationPercentage" [(ngModel)]="memberForm.allocationPercentage"
-                  min="5" max="100" step="5" style="width:100%;accent-color:var(--accent)" />
+                <label class="flabel">Allocation %</label>
+                <input type="number" name="allocationPercentage" [(ngModel)]="memberForm.allocationPercentage"
+                  min="5" max="100" step="5" required class="finput" />
               </div>
               <div class="fg">
                 <label class="flabel">Contributing until <span class="freq">*</span></label>
@@ -298,9 +298,9 @@ function todayIso(): string {
                 </select>
               </div>
               <div class="fg">
-                <label class="flabel">Allocation per person: {{ addTeamForm.allocationPercentage }}%</label>
-                <input type="range" name="allocationPercentage" [(ngModel)]="addTeamForm.allocationPercentage"
-                  min="5" max="100" step="5" style="width:100%;accent-color:var(--accent)" />
+                <label class="flabel">Allocation per person (%)</label>
+                <input type="number" name="allocationPercentage" [(ngModel)]="addTeamForm.allocationPercentage"
+                  min="5" max="100" step="5" required class="finput" />
               </div>
               <div class="fg">
                 <label class="flabel">Contributing until <span class="freq">*</span></label>

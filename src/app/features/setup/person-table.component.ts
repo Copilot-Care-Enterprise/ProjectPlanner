@@ -148,10 +148,13 @@ interface PersonForm {
                 </select>
               </div>
               <div class="fg">
-                <label class="flabel">Effective capacity: {{ (form.effectiveCapacity * 100).toFixed(0) }}%</label>
-                <input type="range" name="effectiveCapacity" [(ngModel)]="form.effectiveCapacity"
-                  min="0.1" max="1" step="0.05" style="width:100%;accent-color:var(--accent)" />
-                <div class="fhint"><span>10%</span><span>100%</span></div>
+                <label class="flabel">Effective capacity %</label>
+                <input type="number"
+                  [ngModel]="+(form.effectiveCapacity * 100).toFixed(0)"
+                  (ngModelChange)="form.effectiveCapacity = $event / 100"
+                  name="effectiveCapacity"
+                  min="10" max="100" step="5" required class="finput" />
+                <span class="fhint" style="justify-content:flex-start">10–100%, accounts for meetings and PTO</span>
               </div>
             </div>
             <div class="dlg-foot">
