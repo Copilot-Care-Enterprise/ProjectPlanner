@@ -14,7 +14,7 @@ const PersonSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
   teamId: z.string().min(1),
-  role: z.enum(['Developer', 'SDET']),
+  role: z.enum(['Developer', 'SDET', 'Operations']),
   effectiveCapacity: z.number().min(0).max(1),
 });
 

@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { AppStore } from '../../store/app.store';
 import type { Person, ProjectMemberAllocation, Role, Team } from '../../../core/types';
 
-const ROLES: Role[] = ['Developer', 'SDET'];
+const ROLES: Role[] = ['Developer', 'SDET', 'Operations'];
 
 type SortCol = 'name' | 'team' | 'role' | 'capacity' | 'allocated' | 'status';
 type StatusVal = 'over' | 'active' | 'idle';

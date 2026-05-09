@@ -342,7 +342,7 @@ export class AppStore {
   importTeamsPeople(payload: {
     teams: Array<{ name: string; description: string }>;
     streams: Array<{ name: string; description: string; color: string }>;
-    people: Array<{ name: string; teamName: string; role: 'Developer' | 'SDET'; effectiveCapacity: number }>;
+    people: Array<{ name: string; teamName: string; role: 'Developer' | 'SDET' | 'Operations'; effectiveCapacity: number }>;
   }): void {
     this.updateScenario(this.activeId(), (s: Scenario) => {
       let teams = [...s.teams];
