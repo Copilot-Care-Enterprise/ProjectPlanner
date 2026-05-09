@@ -7,6 +7,7 @@ import {
   getYear,
   eachWeekOfInterval,
   startOfDay,
+  isAfter,
 } from 'date-fns';
 
 /**
@@ -43,4 +44,22 @@ export function toWeekStart(dateStr: string): string {
  */
 export function weekEndFriday(weekStartStr: string): string {
   return formatISO(addDays(parseISO(weekStartStr), 4), { representation: 'date' });
+}
+
+/**
+ * Counts working days (Mon–Fri) between two ISO date strings, inclusive.
+ * Returns 0 if endDate is before startDate.
+ */
+export function countWorkingDays(startDateStr: string, endDateStr: string): number {
+  const start = startOfDay(parseISO(startDateStr));
+  const end   = startOfDay(parseISO(endDateStr));
+  if (isAfter(start, end)) return 0;
+  let count = 0;
+  let current = start;
+  while (!isAfter(current, end)) {
+    const day = current.getDay();
+    if (day !== 0 && day !== 6) count++;
+    current = addDays(current, 1);
+  }
+  return count;
 }
