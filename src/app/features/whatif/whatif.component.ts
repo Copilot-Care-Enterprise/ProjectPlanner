@@ -102,7 +102,7 @@ const SUGGESTIONS = [
                   <div style="white-space:pre-wrap">{{ msg.content }}</div>
                 } @else {
                   <div [innerHTML]="renderMarkdown(msg.content)"></div>
-                  @if (msg.options && msg.options.length > 0 && !msg.streaming) {
+                  @if (msg.options && !msg.streaming) {
                     <div class="chat-apply-options">
                       @for (opt of msg.options; track opt.option) {
                         <button class="btn btn-ghost chat-apply-btn"
