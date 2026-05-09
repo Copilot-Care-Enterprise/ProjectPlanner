@@ -69,12 +69,12 @@ interface ProjectGroup {
                 @for (group of projectGroupsForStream(stream.id); track group.projectId) {
                   <!-- Fold header -->
                   <div (click)="toggleProject(group.projectId)"
-                    style="display:flex;align-items:center;gap:.75rem;padding:.5rem .75rem;margin-bottom:.25rem;border-radius:.375rem;cursor:pointer;background:var(--navy-light);user-select:none;"
+                    style="display:flex;align-items:center;gap:.75rem;padding:.5rem .75rem;margin-bottom:.25rem;border-radius:.375rem;cursor:pointer;background:var(--surface);border:1px solid var(--border);user-select:none;"
                     [style.border-left]="isExpanded(group.projectId) ? '3px solid var(--accent)' : '3px solid transparent'">
                     <span style="font-size:.7rem;color:var(--muted);width:.75rem;flex-shrink:0;font-family:monospace">
                       {{ isExpanded(group.projectId) ? '▼' : '▶' }}
                     </span>
-                    <span style="font-size:.875rem;font-weight:600;color:#f1f5f9;flex:1">{{ group.projectName }}</span>
+                    <span style="font-size:.875rem;font-weight:600;color:var(--text);flex:1">{{ group.projectName }}</span>
                     <span class="badge badge-blue">{{ group.members.length }} {{ group.members.length === 1 ? 'person' : 'persons' }}</span>
                     <span style="font-size:.8125rem;color:var(--muted);min-width:6rem;text-align:right">{{ groupTotalAlloc(group) }}% total alloc</span>
                   </div>
