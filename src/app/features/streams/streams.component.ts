@@ -74,7 +74,7 @@ interface ProjectGroup {
                     <span style="font-size:.7rem;color:var(--muted);width:.75rem;flex-shrink:0;font-family:monospace">
                       {{ isExpanded(group.projectId) ? '▼' : '▶' }}
                     </span>
-                    <span style="font-size:.875rem;font-weight:600;color:var(--text);flex:1">{{ group.projectName }}</span>
+                    <span style="font-size:.875rem;font-weight:600;color:#f1f5f9;flex:1">{{ group.projectName }}</span>
                     <span class="badge badge-blue">{{ group.members.length }} {{ group.members.length === 1 ? 'person' : 'persons' }}</span>
                     <span style="font-size:.8125rem;color:var(--muted);min-width:6rem;text-align:right">{{ groupTotalAlloc(group) }}% total alloc</span>
                   </div>
