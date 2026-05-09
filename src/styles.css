@@ -127,7 +127,7 @@ html, body {
 
 /* ─── What-if AI Copilot ─────────────────────────────────────────────────────── */
 .whatif-page { padding: 1rem 1.5rem 0; height: calc(100vh - 5rem); box-sizing: border-box; }
-.whatif-layout { display: grid; grid-template-columns: var(--chat-width, 360px) auto 1fr; gap: 0; height: 100%; }
+.whatif-layout { display: grid; grid-template-columns: var(--chat-width, 33vw) auto 1fr; gap: 0; height: 100%; }
 .whatif-resize-handle { width: 6px; cursor: col-resize; background: transparent; position: relative; flex-shrink: 0; z-index: 2; }
 .whatif-resize-handle::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 4px; height: 40px; border-radius: 2px; background: var(--border); transition: background .15s; }
 .whatif-resize-handle:hover::after, .whatif-resize-handle.active::after { background: var(--accent); }
