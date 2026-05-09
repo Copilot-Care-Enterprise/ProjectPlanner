@@ -148,7 +148,6 @@ const SUGGESTIONS = [
           <div class="card">
             <div class="card-head">
               <span class="card-title">Scenario Analysis</span>
-              <button class="btn btn-primary" (click)="openForkDialog()">+ Fork scenario</button>
             </div>
 
             <!-- Scenario pills -->
@@ -219,12 +218,55 @@ const SUGGESTIONS = [
               <p class="empty">Fork a scenario to compare it against the baseline.</p>
             }
           </div>
+
+          <!-- ── AI Actions Log ─────────────────────────────────────────── -->
+          <div class="card" style="margin-top:1rem">
+            <div class="card-head">
+              <span class="card-title">AI Actions Log</span>
+              @if (appliedActions().length > 0) {
+                <button class="btn-lnk btn-lnk-red" style="font-size:.8rem" (click)="clearActionLog()">Clear</button>
+              }
+            </div>
+            @if (appliedActions().length === 0) {
+              <p class="empty">No actions applied yet. Use <strong>Apply Option</strong> buttons in the chat to record changes here.</p>
+            } @else {
+              <div style="padding:.5rem 1.25rem .875rem">
+                @for (entry of appliedActions(); track entry.id) {
+                  <div style="border:1px solid var(--border);border-radius:.375rem;margin-bottom:.625rem;overflow:hidden">
+                    <!-- Entry header -->
+                    <div style="display:flex;align-items:center;gap:.75rem;padding:.5rem .75rem;background:var(--navy-light)">
+                      <span style="font-size:.8125rem;font-weight:600;color:#f1f5f9;flex:1">{{ entry.label }}</span>
+                      <span class="badge badge-blue">{{ entry.scenarioName }}</span>
+                      <span style="font-size:.75rem;color:var(--muted);flex-shrink:0">{{ formatTime(entry.appliedAt) }}</span>
+                    </div>
+                    <!-- Actions list -->
+                    <div style="padding:.5rem .75rem;display:flex;flex-direction:column;gap:.25rem">
+                      @for (a of entry.actions; track $index) {
+                        <div style="display:flex;align-items:center;gap:.5rem;font-size:.8125rem">
+                          <span [class]="actionBadgeClass(a.type)">{{ a.type }}</span>
+                          <span style="color:var(--text)">{{ a.personName }}</span>
+                          <span style="color:var(--muted)">→</span>
+                          <span style="color:var(--text)">{{ a.projectName }}</span>
+                          @if (a.allocationPercentage != null) {
+                            <span class="badge" style="background:var(--border);color:var(--text)">{{ a.allocationPercentage }}%</span>
+                          }
+                          @if (a.endDate) {
+                            <span style="color:var(--muted)">until {{ a.endDate }}</span>
+                          }
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
         </div>
 
       </div>
     </div>
 
-    <!-- Fork dialog -->
     @if (forkDialogOpen()) {
       <div class="dlg-back" (click)="closeForkDialog()">
         <div class="dlg-box" style="max-width:22rem" (click)="$event.stopPropagation()">
@@ -613,6 +655,17 @@ Action types:
 Rules: use exact person and project names from the data above. endDate format: YYYY-MM-DD. allocationPercentage: 1–100. Include entries for EVERY option. The pp-actions block is MANDATORY for every response — never omit it.`;
   }
 
+  // ── Applied Actions log ───────────────────────────────────────────────────
+  readonly appliedActions = signal<Array<{
+    id: string;
+    label: string;
+    scenarioName: string;
+    appliedAt: Date;
+    actions: OptionActions['actions'];
+  }>>([]);
+
+  clearActionLog(): void { this.appliedActions.set([]); }
+
   // ── Fork scenario ─────────────────────────────────────────────────────────
   openForkDialog():  void { this.forkName = ''; this.forkDialogOpen.set(true); }
   closeForkDialog(): void { this.forkDialogOpen.set(false); }
@@ -755,6 +808,15 @@ Rules: use exact person and project names from the data above. endDate format: Y
     if (errors.length > 0) {
       this.applyError.set(errors.join('. '));
     } else {
+      // Record to action log
+      const scenarioName = this.store.activeScenario()?.name ?? 'Unknown';
+      this.appliedActions.update(log => [{
+        id: crypto.randomUUID(),
+        label: opt.label,
+        scenarioName,
+        appliedAt: new Date(),
+        actions: opt.actions,
+      }, ...log]);
       this.closeApplyDialog();
     }
   }
